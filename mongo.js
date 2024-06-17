@@ -11,8 +11,7 @@ if (process.argv.length > 5) {
 }
 
 const password = process.argv[2]
-const url = 
-  ``
+const url = ''
 
 mongoose.set('strictQuery', false)
 
@@ -32,7 +31,7 @@ if (process.argv.length === 3) {
       console.log('phonebook:')
       result.forEach(person => {
         console.log(`${person.name} ${person.number}`)
-      });
+      })
       mongoose.connection.close()
       process.exit(1)
     })
@@ -41,7 +40,7 @@ if (process.argv.length === 3) {
     name: process.argv[3],
     number: process.argv[4],
   })
-  
+
   person.save().then(result => {
     console.log(`added ${result.name} number ${result.number} to phonebook`)
     mongoose.connection.close()
