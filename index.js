@@ -1,29 +1,29 @@
 require('dotenv').config()
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const Person = require("./models/person");
+const express = require('express')
+const cors = require('cors')
+const morgan = require('morgan')
+const Person = require('./models/person')
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(express.static("dist"));
-app.use(cors());
+app.use(express.json())
+app.use(express.static('dist'))
+app.use(cors())
 
-morgan.token("postData", (req, res) => (req.method === 'POST' ? JSON.stringify(req.body) : ''))
+morgan.token('postData', (req) => (req.method === 'POST' ? JSON.stringify(req.body) : ''))
 
 app.use(
   morgan(
-    ":method :url :status :res[content-length] - :response-time ms :postData"
+    ':method :url :status :res[content-length] - :response-time ms :postData'
   )
-);
+)
 
-app.get("/", (req, res) => {
-  res.send("<h1>Phonebook</h1>");
-});
+app.get('/', (req, res) => {
+  res.send('<h1>Phonebook</h1>')
+})
 
-app.get("/info", (req, res) => {
-  curTime = new Date();
+app.get('/info', (req, res) => {
+  const curTime = new Date()
   Person.countDocuments({})
     .then(documentCount => {
       res.send(`
@@ -35,18 +35,18 @@ app.get("/info", (req, res) => {
         </html>
       `)
     })
-});
+})
 
-app.get("/api/persons", (req, res, next) => {
+app.get('/api/persons', (req, res, next) => {
   Person
     .find({})
     .then(result => {
       res.send(result)
     })
     .catch(error => next(error))
-});
+})
 
-app.get("/api/persons/:id", (req, res, next) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person
     .findById(req.params.id)
     .then(person => {
@@ -57,46 +57,48 @@ app.get("/api/persons/:id", (req, res, next) => {
       }
     })
     .catch(error => next(error))
-});
+})
 
-app.post("/api/persons", (req, res, next) => {
-  const body = req.body;
+app.post('/api/persons', (req, res, next) => {
+  const personToAdd = req.body
 
-  if (!body.name) {
-    return res.status(400).json({ error: "Person must have a name!" });
-  } else if (!body.number) {
-    return res.status(400).json({ error: "Person must have a number!" });
+  if (!personToAdd.name) {
+    return res.status(400).json({ error: 'Person must have a name!' })
+  } else if (!personToAdd.number) {
+    return res.status(400).json({ error: 'Person must have a number!' })
   }
 
   const newPerson = new Person ({
-    name: body.name,
-    number: body.number,
+    name: personToAdd.name,
+    number: personToAdd.number,
   })
+  newPerson.validateSync()
 
   newPerson
     .save()
-    .then(result => {
-      res.json(result);
-    })
-    .catch(error => next(error))
-});
-
-app.put("/api/persons/:id", (req, res, next) => {
-  const updatedPerson = req.body
-  Person.findByIdAndUpdate(req.params.id, updatedPerson, {new:true})
-    .then(result => {
-      res.send(result)
+    .then(savedPerson => {
+      res.json(savedPerson)
     })
     .catch(error => next(error))
 })
 
-app.delete("/api/persons/:id", (req, res, next) => {
+app.put('/api/persons/:id', (req, res, next) => {
+  const updatePerson = req.body
+
+  Person.findByIdAndUpdate(req.params.id, updatePerson, { new:true })
+    .then(updatedPerson => {
+      res.send(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
+app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
-    .then(result => {
+    .then(() => {
       res.status(204).end()
     })
     .catch(error => next(error))
-});
+})
 
 const errorHandler = (error, req, res, next) => {
   console.error(error.message)
@@ -111,7 +113,7 @@ const errorHandler = (error, req, res, next) => {
 }
 app.use(errorHandler)
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
